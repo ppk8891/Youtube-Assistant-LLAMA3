@@ -19,11 +19,11 @@ def get_transcript(url:str,video_title):
     loader = YoutubeLoader.from_youtube_url(url)
     transcript = loader.load()
         
-    # Assuming transcript is a list of documents, and each document has a 'page_content' attribute
     transcript_text = '\n'.join([doc.page_content for doc in transcript])
-
-    """    # Step 3: Save the transcript to a text file
-    file_path = "./Transcripts/"+video_title+"_transcript.txt"  # Specify the file path where you want to save the transcript
+    
+    """
+    #  Save the transcript to a text file
+    file_path = "./Transcripts/"+video_title+"_transcript.txt"
 
     with open(file_path, 'w', encoding='utf-8') as file:
         file.write(transcript_text)

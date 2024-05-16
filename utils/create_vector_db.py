@@ -6,17 +6,15 @@ from utils.helper import get_embedding_document,split_document_into_chunks
 d = 768  # number of embedding dimension
 
 def get_vector_db(transcript,embedder):
-    """
-    with open (transcript_file,'r',encoding='utf-8') as file:
-        transcript = file.read()
-    """    
+    
     chunks = split_document_into_chunks(transcript)
-    print("Docs : ",len(chunks))
+    print("Number of Chunks : ",len(chunks))
     chunk_0 = str(chunks[0]).split('=')[1]
 
     index = faiss.IndexFlatL2(d)
     X = np.zeros((len(chunks),d),dtype='float32')
     sentences = []
+    print("Creating embeddings for the yt transcript.")
     for i, chunk in enumerate(chunks):
         
         #print(f"creating embedding for chunk {i}")
@@ -29,5 +27,5 @@ def get_vector_db(transcript,embedder):
 
         #add embedding to faiss index
         index.add(embedding)
-            
+    print("Vector DB created")        
     return index

@@ -1,46 +1,43 @@
-from utils import create_vector_db
 import streamlit as st
-import textwrap
 from utils.helper import get_embedding_query, split_document_into_chunks
 from utils.create_vector_db import get_vector_db
 from utils.yt_transcript_loader import get_video_title, get_transcript
-import requests
-import json
 from gpt4all import Embed4All
 import os
+from langchain_openai import ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
 
 # Load embedding model
 embedder = Embed4All(os.getcwd()+'/Embedding Models/nomic-embed-text-v1.f16.gguf')
 
+def get_answer(query, context):
+    llm_server_url = 'http://localhost:1234/v1'
+    api_key = 'not_needed'
+    
+    template = """
+    You are a helpful, smart, kind, and efficient AI assistant. You always fulfill the user's requests to the best of your ability.
+    Be precise. You might not find the answer from paragraphs at the beginning. 
+    Sometimes the answer might be at the end of the context paragraph.
+    
+    "{query}".
+    
+    From this context "{context}.
+    
+    """
+    prompt = ChatPromptTemplate.from_template(template)
 
-def get_response_from_query(query, context):
-    llm_server_url = 'http://localhost:1234/v1/chat/completions'
+    # Using LM Studio Local Inference Server
+    llm = ChatOpenAI(base_url=llm_server_url,api_key=api_key,model='LLAMA3',temperature=0.3)
 
-    headers = {
-        'Content-Type': 'application/json'
-    }
+    chain = prompt | llm | StrOutputParser()
+    
+    return chain.stream({
+        "query":query,
+        "context":context
+    })
 
-    data = {
-        "model": "QuantFactory/Meta-Llama-3-8B-Instruct-GGUF",
-        "messages": [
-            {"role": "system", "content": "You are a helpful, smart, kind, and efficient AI assistant. You always fulfill the user's requests to the best of your ability."},
-            {"role": "user", "content": f"""Answer this question {query}. Based on this context {context}. Make the response short.
-             If you think there is not enough context to answer the question, reply a single word 'no'."""}
-        ],
-        "temperature": 0.2,
-        "max_tokens": -1,
-        "stream": 'true'
-    }
-
-    response = requests.post(llm_server_url, headers=headers, data=json.dumps(data))
-
-    #print(str(response.json()['choices'][0]['message']['content'].replace('\n',' ')))
-    return response.json()['choices'][0]['message']['content'].replace('\n',' ')
-
-st.title("LLAMA3 - Youtube Assistant")
-
-def get_context(db, query):
-    pass
+st.title("LLAMA3 - Youtube Assistant 🤖")
 
 with st.sidebar:
     with st.form(key='my_form'):
@@ -60,21 +57,19 @@ if query and youtube_url:
     db = get_vector_db(transcript,embedder)
     # get embeddings from query
     query_embeddings = get_embedding_query(query,embedder)
-    
+    print("Searching for similar content.")
+    # similarity search
     distances, indices = db.search(query_embeddings.reshape(1, -1), 2)
+    
     context = []
     for row in indices:
         for i in row:
             context.append(chunks[i].page_content)
             #print(f"Chunk index {i}: {chunks[i]}")
-    print("searched")
+    print("Search Complete")
     
     context  = " ".join(context)
     #print(context)
-    response = get_response_from_query(query,context)
-    response = str(response)
-    print('type of response : ',type(response))
-    print(response)
-
+    print("Context : ", context)
     st.subheader("Answer: ")
-    st.text(textwrap.fill(response,width=80))
+    st.write_stream(get_answer(query,context))

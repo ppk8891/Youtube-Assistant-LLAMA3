@@ -1,4 +1,10 @@
 # Youtube-Assistant-LLAMA3 🤖
+### Demo
+
+
+https://github.com/ppk8891/Youtube-Assistant-LLAMA3/assets/131942503/c10b440c-fb17-406c-9718-e91cc2333d2e
+
+
 
 ### Overview
 Youtube-Assistant-LLAMA3 is a simple RAG (Retrieval-Augmented Generation) chatbot designed to answer questions about YouTube videos.

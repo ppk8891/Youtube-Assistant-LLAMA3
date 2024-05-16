@@ -4,6 +4,8 @@
 
 https://github.com/ppk8891/Youtube-Assistant-LLAMA3/assets/131942503/c10b440c-fb17-406c-9718-e91cc2333d2e
 
+### Diagram
+![llama3-rag-diagram](https://github.com/ppk8891/Youtube-Assistant-LLAMA3/assets/131942503/18700b39-5f13-4be1-9614-39eff24c0dd5)
 
 
 ### Overview
